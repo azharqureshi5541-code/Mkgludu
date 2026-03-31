@@ -1,50 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ultra Ludo King</title>
+<title>Ludo Level 4</title>
 
 <style>
-body { text-align:center; font-family:Arial; background:#eee; }
+body { text-align:center; font-family:Arial; background:#f2f2f2; }
 
-.board {
-  width:450px;
+.board{
+  width:320px;
   display:grid;
-  grid-template-columns:repeat(15,30px);
+  grid-template-columns:repeat(8,40px);
   margin:20px auto;
 }
 
-.cell {
-  width:30px;
-  height:30px;
-  border:1px solid #999;
+.cell{
+  width:40px;
+  height:40px;
+  border:1px solid #aaa;
   display:flex;
-  flex-wrap:wrap;
-  align-items:center;
   justify-content:center;
-  font-size:10px;
+  align-items:center;
+  background:white;
 }
 
-.redHome { background:#ffcccc; }
-.blueHome { background:#cce5ff; }
-.greenHome { background:#ccffcc; }
-.yellowHome { background:#fff3cc; }
+.path{ background:#ddd; }
 
-.path { background:#ddd; }
-
-.token {
-  width:10px;
-  height:10px;
+.token{
+  width:14px;
+  height:14px;
   border-radius:50%;
-  margin:1px;
-  cursor:pointer;
 }
 
-.red { background:red; }
-.blue { background:blue; }
-.green { background:green; }
-.yellow { background:gold; }
+.red{ background:red; }
+.blue{ background:blue; }
 
-button {
+button{
   padding:10px 20px;
   font-size:16px;
   background:black;
@@ -52,15 +42,15 @@ button {
   border:none;
 }
 
-#dice { font-size:22px; margin:10px; }
-</style>
+#dice{ font-size:22px; margin:10px; }
 
+</style>
 </head>
 
 <body>
 
-<h1>👑 Ultra Ludo King</h1>
-<h2 id="turn">🔴 Red Turn</h2>
+<h2>🎲 Ludo Level 4</h2>
+<h3 id="turn">Red Turn</h3>
 
 <button onclick="rollDice()">Roll Dice</button>
 <div id="dice">🎲</div>
@@ -69,116 +59,105 @@ button {
 
 <script>
 
-// simple circular path (demo)
-let path = [];
-for(let i=0;i<60;i++) path.push(i);
+// PATH
+let path = [
+0,1,2,3,4,5,6,7,
+15,23,31,39,47,55,63,
+62,61,60,59,58,57,56,
+48,40,32,24,16,8
+];
 
-// board
+// CREATE BOARD
 let board = document.getElementById("board");
 
-for(let i=0;i<225;i++){
+for(let i=0;i<64;i++){
   let div=document.createElement("div");
   div.className="cell";
   div.id="c"+i;
 
   if(path.includes(i)) div.classList.add("path");
 
-  // homes
-  if(i<30) div.classList.add("redHome");
-  if(i>=195) div.classList.add("blueHome");
-  if(i%15<5 && i>150) div.classList.add("greenHome");
-  if(i%15>9 && i<75) div.classList.add("yellowHome");
-
   board.appendChild(div);
 }
 
-// players
-let players = {
-  red: [-1,-1,-1,-1],
-  blue: [-1,-1,-1,-1],
-  green: [-1,-1,-1,-1],
-  yellow: [-1,-1,-1,-1]
-};
+// PLAYERS (4 tokens each)
+let red=[-1,-1,-1,-1];
+let blue=[-1,-1,-1,-1];
 
-let turnList = ["red","blue","green","yellow"];
-let turnIndex = 0;
-let diceValue = 0;
+let turn="red";
+let dice=0;
 
-function currentPlayer(){
-  return turnList[turnIndex];
-}
-
+// DRAW TOKENS
 function draw(){
   document.querySelectorAll(".cell").forEach(c=>c.innerHTML="");
 
-  for(let p in players){
-    players[p].forEach((pos,i)=>{
+  red.forEach((p,i)=>{
+    if(p>=0){
       let t=document.createElement("div");
-      t.className="token "+p;
-      t.onclick=()=>moveToken(p,i);
+      t.className="token red";
+      t.onclick=()=>move("red",i);
+      document.getElementById("c"+path[p]).appendChild(t);
+    }
+  });
 
-      if(pos>=0){
-        document.getElementById("c"+path[pos]).appendChild(t);
-      } else {
-        document.getElementById("c0").appendChild(t);
-      }
-    });
-  }
+  blue.forEach((p,i)=>{
+    if(p>=0){
+      let t=document.createElement("div");
+      t.className="token blue";
+      t.onclick=()=>move("blue",i);
+      document.getElementById("c"+path[p]).appendChild(t);
+    }
+  });
 }
 
+// DICE
 function rollDice(){
-  diceValue=Math.floor(Math.random()*6)+1;
-  document.getElementById("dice").innerText="🎲 "+diceValue;
+  dice=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").innerText="🎲 "+dice;
 }
 
-function moveToken(player,index){
+// MOVE
+function move(player,i){
 
-  if(player!==currentPlayer() || diceValue===0) return;
+  if(player!==turn) return;
 
-  let arr = players[player];
+  let arr = (player==="red")?red:blue;
 
-  if(arr[index]===-1){
-    if(diceValue===6){
-      arr[index]=0;
-    } else return;
-  } else {
-    arr[index]+=diceValue;
+  // ENTRY
+  if(arr[i]===-1){
+    if(dice===6){
+      arr[i]=0;
+    }else return;
+  }
+  else{
+    arr[i]+=dice;
 
-    if(arr[index]>=path.length-1){
-      arr[index]=path.length-1;
-      setTimeout(()=>alert(player+" Wins!"),200);
-    }
-
-    // kill others
-    for(let p in players){
-      if(p!==player){
-        players[p].forEach((e,i)=>{
-          if(arr[index]===e){
-            players[p][i]=-1;
-          }
-        });
-      }
+    if(arr[i]>=path.length){
+      arr[i]=path.length-1;
     }
   }
 
-  if(diceValue!==6){
-    turnIndex = (turnIndex+1)%4;
+  // KILL LOGIC
+  let opponent = (player==="red")?blue:red;
+
+  opponent.forEach((p,j)=>{
+    if(p===arr[i]){
+      opponent[j]=-1; // kill
+    }
+  });
+
+  // TURN CHANGE
+  if(dice!==6){
+    turn = (turn==="red")?"blue":"red";
   }
 
-  diceValue=0;
-  updateTurn();
+  document.getElementById("turn").innerText=
+    (turn==="red"?"Red":"Blue")+" Turn";
+
   draw();
 }
 
-function updateTurn(){
-  let p=currentPlayer();
-  let emoji = {
-    red:"🔴", blue:"🔵", green:"🟢", yellow:"🟡"
-  };
-  document.getElementById("turn").innerText =
-    emoji[p]+" "+p.toUpperCase()+" Turn";
-}
-
+// INIT
 draw();
 
 </script>
