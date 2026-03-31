@@ -1,57 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Full Ludo Game</title>
+<title>Pro Ludo</title>
 
 <style>
-body {
-    text-align: center;
-    font-family: Arial;
-}
+body { text-align:center; font-family:Arial; }
 
 .board {
-    display: grid;
-    grid-template-columns: repeat(10, 40px);
-    grid-template-rows: repeat(10, 40px);
-    gap: 2px;
-    justify-content: center;
-    margin-top: 20px;
+  width:300px;
+  height:300px;
+  display:grid;
+  grid-template-columns:repeat(15,20px);
+  grid-template-rows:repeat(15,20px);
+  margin:auto;
 }
 
 .cell {
-    width: 40px;
-    height: 40px;
-    background: #eee;
-    border: 1px solid #999;
+  width:20px;
+  height:20px;
+  border:1px solid #ccc;
 }
 
-.player1 { background: red; }
-.player2 { background: blue; }
+.red { background:red; }
+.green { background:green; }
+.blue { background:blue; }
+.yellow { background:yellow; }
 
 .token {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin: auto;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin:auto;
 }
 
-.red { background: red; }
-.blue { background: blue; }
+.t-red { background:red; }
+.t-blue { background:blue; }
 
 button {
-    padding: 10px 20px;
-    font-size: 18px;
-    margin-top: 20px;
+  padding:10px 20px;
+  margin-top:15px;
 }
 </style>
-
 </head>
 
 <body>
 
-<h1>🎲 Full Ludo Game</h1>
+<h1>🎲 Pro Ludo Game</h1>
 
-<h2 id="turn">Player 1 Turn (Red)</h2>
+<h2 id="turn">Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
 <h3 id="dice"></h3>
@@ -61,57 +57,60 @@ button {
 <script>
 let board = document.getElementById("board");
 
-// create board
-for(let i=0;i<100;i++){
-    let div = document.createElement("div");
-    div.className = "cell";
-    div.id = "cell"+i;
-    board.appendChild(div);
+// create 15x15 board
+for(let i=0;i<225;i++){
+  let div=document.createElement("div");
+  div.className="cell";
+
+  // color zones
+  if(i<45 && i%15<5) div.classList.add("red");
+  if(i<45 && i%15>9) div.classList.add("green");
+  if(i>179 && i%15<5) div.classList.add("blue");
+  if(i>179 && i%15>9) div.classList.add("yellow");
+
+  div.id="c"+i;
+  board.appendChild(div);
 }
 
-// players
-let p1 = 0;
-let p2 = 0;
-let turn = 1;
+// positions
+let redPos=0;
+let bluePos=0;
+let turn="red";
 
-function drawTokens(){
-    document.querySelectorAll(".cell").forEach(c => c.innerHTML = "");
+function draw(){
+  document.querySelectorAll(".cell").forEach(c=>c.innerHTML="");
 
-    let t1 = document.createElement("div");
-    t1.className = "token red";
-    document.getElementById("cell"+p1).appendChild(t1);
+  let r=document.createElement("div");
+  r.className="token t-red";
+  document.getElementById("c"+redPos).appendChild(r);
 
-    let t2 = document.createElement("div");
-    t2.className = "token blue";
-    document.getElementById("cell"+p2).appendChild(t2);
+  let b=document.createElement("div");
+  b.className="token t-blue";
+  document.getElementById("c"+bluePos).appendChild(b);
 }
 
-drawTokens();
+draw();
 
 function rollDice(){
-    let num = Math.floor(Math.random()*6)+1;
-    document.getElementById("dice").innerText = "Dice: "+num;
+  let d=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").innerText="Dice: "+d;
 
-    if(turn === 1){
-        p1 += num;
-        if(p1 > 99) p1 = 99;
-        turn = 2;
-        document.getElementById("turn").innerText = "Player 2 Turn (Blue)";
-    } else {
-        p2 += num;
-        if(p2 > 99) p2 = 99;
-        turn = 1;
-        document.getElementById("turn").innerText = "Player 1 Turn (Red)";
-    }
+  if(turn==="red"){
+    redPos+=d;
+    if(redPos>224) redPos=224;
+    turn="blue";
+    document.getElementById("turn").innerText="Blue Turn";
+  } else {
+    bluePos+=d;
+    if(bluePos>224) bluePos=224;
+    turn="red";
+    document.getElementById("turn").innerText="Red Turn";
+  }
 
-    drawTokens();
+  draw();
 
-    if(p1 === 99){
-        alert("Player 1 Wins!");
-    }
-    if(p2 === 99){
-        alert("Player 2 Wins!");
-    }
+  if(redPos===224) alert("Red Wins!");
+  if(bluePos===224) alert("Blue Wins!");
 }
 </script>
 
