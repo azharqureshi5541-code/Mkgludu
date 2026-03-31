@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ludo Level 3 Pro</title>
+<title>Ludo Level 3 FIX</title>
 
 <style>
 body { text-align:center; font-family:Arial; background:#f2f2f2; }
@@ -13,7 +13,7 @@ body { text-align:center; font-family:Arial; background:#f2f2f2; }
   margin:20px auto;
 }
 
-.cell {²
+.cell {
   width:40px;
   height:40px;
   border:1px solid #aaa;
@@ -52,7 +52,7 @@ button {
 
 <body>
 
-<h1>🎲 Ludo Level 3 Pro</h1>
+<h1>🎲 Ludo Level 3 FIX</h1>
 <h2 id="turn">🔴 Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
@@ -120,9 +120,14 @@ function moveToken(player,index){
   let arr = player==="red"?red:blue;
   let enemy = player==="red"?blue:red;
 
-  if(arr[index]===-1 && diceValue===6){
-    arr[index]=0;
-  } else if(arr[index]>=0){
+  // entry
+  if(arr[index]===-1){
+    if(diceValue===6){
+      arr[index]=0;
+    } else {
+      return;
+    }
+  } else {
     arr[index]+=diceValue;
 
     if(arr[index]>=path.length-1){
@@ -136,17 +141,15 @@ function moveToken(player,index){
         enemy[i]=-1;
       }
     });
-  } else {
-    return;
   }
 
-  diceValue=0;
-
-  if(diceValue!==6){
-    turn = turn==="red"?"blue":"red";
+  // extra turn on 6
+  if(diceValue !== 6){
+    turn = turn==="red" ? "blue" : "red";
     updateTurn();
   }
 
+  diceValue=0;
   draw();
 }
 
