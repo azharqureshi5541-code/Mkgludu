@@ -60,6 +60,59 @@ button {
 <body>
 
 <h1>🎲 Ultimate Ludo</h1>
+<h2 id="turn">🔴 Red <!DOCTYPE html>
+<html>
+<head>
+<title>Ludo Level 2</title>
+
+<style>
+body { text-align:center; font-family:Arial; background:#f2f2f2; }
+
+.board {
+  width:320px;
+  display:grid;
+  grid-template-columns:repeat(8,40px);
+  margin:20px auto;
+}
+
+.cell {
+  width:40px;
+  height:40px;
+  border:1px solid #aaa;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:white;
+}
+
+.path { background:#ddd; }
+
+.token {
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  margin:1px;
+}
+
+.red { background:red; }
+.blue { background:blue; }
+
+button {
+  padding:10px 20px;
+  font-size:16px;
+  background:black;
+  color:white;
+  border:none;
+}
+
+#dice { font-size:20px; margin:10px; }
+</style>
+
+</head>
+
+<body>
+
+<h1>🎲 Ludo Level 2</h1>
 <h2 id="turn">🔴 Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
@@ -69,7 +122,7 @@ button {
 
 <script>
 
-// path (loop)
+// path
 let path = [
 0,1,2,3,4,5,6,7,
 15,23,31,39,47,55,63,
@@ -79,91 +132,81 @@ let path = [
 
 // create board
 let board = document.getElementById("board");
-
 for(let i=0;i<64;i++){
   let div=document.createElement("div");
   div.className="cell";
   div.id="c"+i;
-
   if(path.includes(i)) div.classList.add("path");
-
   board.appendChild(div);
 }
 
-// players
-let redPos = -1;
-let bluePos = -1;
+// players tokens
+let red = [-1,-1];
+let blue = [-1,-1];
 let turn = "red";
 
 function draw(){
   document.querySelectorAll(".cell").forEach(c=>c.innerHTML="");
 
-  if(redPos >= 0){
-    let r=document.createElement("div");
-    r.className="token red";
-    document.getElementById("c"+path[redPos]).appendChild(r);
-  }
+  red.forEach(p=>{
+    if(p>=0){
+      let t=document.createElement("div");
+      t.className="token red";
+      document.getElementById("c"+path[p]).appendChild(t);
+    }
+  });
 
-  if(bluePos >= 0){
-    let b=document.createElement("div");
-    b.className="token blue";
-    document.getElementById("c"+path[bluePos]).appendChild(b);
-  }
+  blue.forEach(p=>{
+    if(p>=0){
+      let t=document.createElement("div");
+      t.className="token blue";
+      document.getElementById("c"+path[p]).appendChild(t);
+    }
+  });
 }
 
 function rollDice(){
-  let d = Math.floor(Math.random()*6)+1;
-  document.getElementById("dice").innerText = "🎲 " + d;
+  let d=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").innerText="🎲 "+d;
 
   if(turn==="red"){
-    moveRed(d);
+    move(red, blue, d);
+    if(d!==6){ turn="blue"; updateTurn(); }
   } else {
-    moveBlue(d);
+    move(blue, red, d);
+    if(d!==6){ turn="red"; updateTurn(); }
   }
 
   draw();
 }
 
-function moveRed(d){
-  if(redPos === -1 && d === 6){
-    redPos = 0;
-  } else if(redPos >= 0){
-    redPos += d;
-    if(redPos >= path.length-1){
-      redPos = path.length-1;
-      setTimeout(()=>alert("🔴 Red Wins!"),200);
+function move(player, enemy, d){
+  for(let i=0;i<player.length;i++){
+    if(player[i]===-1 && d===6){
+      player[i]=0;
+      return;
     }
-  }
+    if(player[i]>=0){
+      player[i]+=d;
+      if(player[i]>=path.length-1){
+        player[i]=path.length-1;
+        setTimeout(()=>alert(turn+" wins!"),200);
+      }
 
-  if(redPos === bluePos && redPos !== -1){
-    bluePos = -1;
-  }
-
-  if(d !== 6){
-    turn="blue";
-    document.getElementById("turn").innerText="🔵 Blue Turn";
+      // kill
+      for(let j=0;j<enemy.length;j++){
+        if(player[i]===enemy[j]){
+          enemy[j]=-1;
+        }
+      }
+      return;
+    }
   }
 }
 
-function moveBlue(d){
-  if(bluePos === -1 && d === 6){
-    bluePos = 0;
-  } else if(bluePos >= 0){
-    bluePos += d;
-    if(bluePos >= path.length-1){
-      bluePos = path.length-1;
-      setTimeout(()=>alert("🔵 Blue Wins!"),200);
-    }
-  }
-
-  if(bluePos === redPos && bluePos !== -1){
-    redPos = -1;
-  }
-
-  if(d !== 6){
-    turn="red";
-    document.getElementById("turn").innerText="🔴 Red Turn";
-  }
+function updateTurn(){
+  document.getElementById("turn").innerText =
+    turn==="red" ? "🔴 Red Turn" : "🔵 Blue Turn";
 }
 
 draw();
