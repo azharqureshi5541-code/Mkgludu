@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ludo Level 3 FIX</title>
+<title>Ludo King Lite</title>
 
 <style>
-body { text-align:center; font-family:Arial; background:#f2f2f2; }
+body { text-align:center; font-family:Arial; background:#f0f0f0; }
 
 .board {
-  width:320px;
+  width:360px;
   display:grid;
-  grid-template-columns:repeat(8,40px);
+  grid-template-columns:repeat(6,60px);
   margin:20px auto;
 }
 
 .cell {
-  width:40px;
-  height:40px;
-  border:1px solid #aaa;
+  width:60px;
+  height:60px;
+  border:1px solid #999;
   display:flex;
   flex-wrap:wrap;
   align-items:center;
@@ -24,13 +24,15 @@ body { text-align:center; font-family:Arial; background:#f2f2f2; }
   background:white;
 }
 
+.redHome { background:#ffcccc; }
+.blueHome { background:#cce5ff; }
 .path { background:#ddd; }
 
 .token {
-  width:14px;
-  height:14px;
+  width:18px;
+  height:18px;
   border-radius:50%;
-  margin:1px;
+  margin:2px;
   cursor:pointer;
 }
 
@@ -45,14 +47,14 @@ button {
   border:none;
 }
 
-#dice { font-size:20px; margin:10px; }
+#dice { font-size:22px; margin:10px; }
 </style>
 
 </head>
 
 <body>
 
-<h1>🎲 Ludo Level 3 FIX</h1>
+<h1>👑 Ludo King Lite</h1>
 <h2 id="turn">🔴 Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
@@ -62,20 +64,27 @@ button {
 
 <script>
 
+// simple path
 let path = [
-0,1,2,3,4,5,6,7,
-15,23,31,39,47,55,63,
-62,61,60,59,58,57,56,
-48,40,32,24,16,8
+8,9,10,11,
+17,23,29,
+28,27,26,
+20,14
 ];
 
+// create board
 let board = document.getElementById("board");
 
-for(let i=0;i<64;i++){
+for(let i=0;i<36;i++){
   let div=document.createElement("div");
   div.className="cell";
   div.id="c"+i;
+
   if(path.includes(i)) div.classList.add("path");
+
+  if(i<6) div.classList.add("redHome");
+  if(i>=30) div.classList.add("blueHome");
+
   board.appendChild(div);
 }
 
@@ -89,21 +98,29 @@ let diceValue=0;
 function draw(){
   document.querySelectorAll(".cell").forEach(c=>c.innerHTML="");
 
+  // RED
   red.forEach((p,i)=>{
+    let t=document.createElement("div");
+    t.className="token red";
+    t.onclick=()=>moveToken("red",i);
+
     if(p>=0){
-      let t=document.createElement("div");
-      t.className="token red";
-      t.onclick=()=>moveToken("red",i);
       document.getElementById("c"+path[p]).appendChild(t);
+    } else {
+      document.getElementById("c0").appendChild(t);
     }
   });
 
+  // BLUE
   blue.forEach((p,i)=>{
+    let t=document.createElement("div");
+    t.className="token blue";
+    t.onclick=()=>moveToken("blue",i);
+
     if(p>=0){
-      let t=document.createElement("div");
-      t.className="token blue";
-      t.onclick=()=>moveToken("blue",i);
       document.getElementById("c"+path[p]).appendChild(t);
+    } else {
+      document.getElementById("c35").appendChild(t);
     }
   });
 }
@@ -120,13 +137,10 @@ function moveToken(player,index){
   let arr = player==="red"?red:blue;
   let enemy = player==="red"?blue:red;
 
-  // entry
   if(arr[index]===-1){
     if(diceValue===6){
       arr[index]=0;
-    } else {
-      return;
-    }
+    } else return;
   } else {
     arr[index]+=diceValue;
 
@@ -143,9 +157,8 @@ function moveToken(player,index){
     });
   }
 
-  // extra turn on 6
   if(diceValue !== 6){
-    turn = turn==="red" ? "blue" : "red";
+    turn = turn==="red"?"blue":"red";
     updateTurn();
   }
 
