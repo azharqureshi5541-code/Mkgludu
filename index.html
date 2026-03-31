@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ludo Level 5</title>
+<title>Final Ludo King</title>
 
 <style>
 body { text-align:center; font-family:Arial; background:#eee; }
 
 .board {
-  width:400px;
+  width:420px;
   display:grid;
-  grid-template-columns:repeat(10,40px);
+  grid-template-columns:repeat(10,42px);
   margin:20px auto;
 }
 
 .cell {
-  width:40px;
-  height:40px;
+  width:42px;
+  height:42px;
   border:1px solid #999;
   display:flex;
   flex-wrap:wrap;
   align-items:center;
   justify-content:center;
-  font-size:10px;
 }
 
 .path { background:#ddd; }
-.safe { background:#9ccc65; }
+.safe { background:#8bc34a; }
+
+.homeRed { background:#ffcdd2; }
+.homeBlue { background:#bbdefb; }
+.homeGreen { background:#c8e6c9; }
+.homeYellow { background:#fff9c4; }
 
 .token {
   width:12px;
@@ -55,7 +59,7 @@ button {
 
 <body>
 
-<h1>🎲 Ludo Level 5</h1>
+<h1>👑 Final Ludo King</h1>
 <h2 id="turn">🔴 Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
@@ -65,12 +69,20 @@ button {
 
 <script>
 
-// PATH
+// MAIN PATH
 let path = [];
 for(let i=0;i<40;i++) path.push(i);
 
 // SAFE ZONES
 let safeZones = [0,8,16,24,32];
+
+// HOME PATH (last steps)
+let homePath = {
+  red:[40,41,42,43],
+  blue:[44,45,46,47],
+  green:[48,49,50,51],
+  yellow:[52,53,54,55]
+};
 
 // BOARD
 let board = document.getElementById("board");
@@ -83,6 +95,9 @@ for(let i=0;i<100;i++){
   if(path.includes(i)) div.classList.add("path");
   if(safeZones.includes(i)) div.classList.add("safe");
 
+  if(i<10) div.classList.add("homeRed");
+  if(i>=90) div.classList.add("homeBlue");
+
   board.appendChild(div);
 }
 
@@ -92,6 +107,10 @@ let players = {
   blue: [-1,-1,-1,-1],
   green: [-1,-1,-1,-1],
   yellow: [-1,-1,-1,-1]
+};
+
+let finished = {
+  red:0, blue:0, green:0, yellow:0
 };
 
 let turnList = ["red","blue","green","yellow"];
@@ -138,11 +157,17 @@ function move(player,i){
   }
   else{
     arr[i]+=dice;
+
+    // ENTER HOME PATH
     if(arr[i]>=path.length){
-      arr[i]=path.length-1;
+      finished[player]++;
+      arr[i]=-1;
+      if(finished[player]===4){
+        setTimeout(()=>alert(player+" WINS GAME!"),200);
+      }
     }
 
-    // KILL (only if not safe)
+    // KILL
     for(let p in players){
       if(p!==player){
         players[p].forEach((e,j)=>{
@@ -155,7 +180,7 @@ function move(player,i){
   }
 
   if(dice!==6){
-    turnIndex = (turnIndex+1)%4;
+    turnIndex=(turnIndex+1)%4;
   }
 
   updateTurn();
@@ -165,7 +190,7 @@ function move(player,i){
 
 function updateTurn(){
   let p=currentPlayer();
-  let emoji = {red:"🔴",blue:"🔵",green:"🟢",yellow:"🟡"};
+  let emoji={red:"🔴",blue:"🔵",green:"🟢",yellow:"🟡"};
   document.getElementById("turn").innerText =
     emoji[p]+" "+p.toUpperCase()+" Turn";
 }
