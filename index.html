@@ -1,117 +1,173 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Pro Ludo</title>
+<title>Ultimate Ludo</title>
 
 <style>
-body { text-align:center; font-family:Arial; }
+body {
+  text-align:center;
+  font-family:Arial;
+  background:#f5f5f5;
+}
+
+h1 { margin-top:10px; }
 
 .board {
-  width:300px;
-  height:300px;
+  width:320px;
   display:grid;
-  grid-template-columns:repeat(15,20px);
-  grid-template-rows:repeat(15,20px);
-  margin:auto;
+  grid-template-columns:repeat(8,40px);
+  margin:20px auto;
 }
 
 .cell {
-  width:20px;
-  height:20px;
-  border:1px solid #ccc;
+  width:40px;
+  height:40px;
+  border:1px solid #aaa;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:white;
+}
+
+.path { background:#ddd; }
+
+.token {
+  width:22px;
+  height:22px;
+  border-radius:50%;
 }
 
 .red { background:red; }
-.green { background:green; }
 .blue { background:blue; }
-.yellow { background:yellow; }
-
-.token {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  margin:auto;
-}
-
-.t-red { background:red; }
-.t-blue { background:blue; }
 
 button {
   padding:10px 20px;
-  margin-top:15px;
+  font-size:16px;
+  border:none;
+  background:black;
+  color:white;
+  border-radius:5px;
+}
+
+#dice {
+  font-size:20px;
+  margin:10px;
 }
 </style>
+
 </head>
 
 <body>
 
-<h1>🎲 Pro Ludo Game</h1>
-
-<h2 id="turn">Red Turn</h2>
+<h1>🎲 Ultimate Ludo</h1>
+<h2 id="turn">🔴 Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
-<h3 id="dice"></h3>
+<div id="dice">🎲</div>
 
 <div class="board" id="board"></div>
 
 <script>
+
+// path (loop)
+let path = [
+0,1,2,3,4,5,6,7,
+15,23,31,39,47,55,63,
+62,61,60,59,58,57,56,
+48,40,32,24,16,8
+];
+
+// create board
 let board = document.getElementById("board");
 
-// create 15x15 board
-for(let i=0;i<225;i++){
+for(let i=0;i<64;i++){
   let div=document.createElement("div");
   div.className="cell";
-
-  // color zones
-  if(i<45 && i%15<5) div.classList.add("red");
-  if(i<45 && i%15>9) div.classList.add("green");
-  if(i>179 && i%15<5) div.classList.add("blue");
-  if(i>179 && i%15>9) div.classList.add("yellow");
-
   div.id="c"+i;
+
+  if(path.includes(i)) div.classList.add("path");
+
   board.appendChild(div);
 }
 
-// positions
-let redPos=0;
-let bluePos=0;
-let turn="red";
+// players
+let redPos = -1;
+let bluePos = -1;
+let turn = "red";
 
 function draw(){
   document.querySelectorAll(".cell").forEach(c=>c.innerHTML="");
 
-  let r=document.createElement("div");
-  r.className="token t-red";
-  document.getElementById("c"+redPos).appendChild(r);
+  if(redPos >= 0){
+    let r=document.createElement("div");
+    r.className="token red";
+    document.getElementById("c"+path[redPos]).appendChild(r);
+  }
 
-  let b=document.createElement("div");
-  b.className="token t-blue";
-  document.getElementById("c"+bluePos).appendChild(b);
+  if(bluePos >= 0){
+    let b=document.createElement("div");
+    b.className="token blue";
+    document.getElementById("c"+path[bluePos]).appendChild(b);
+  }
+}
+
+function rollDice(){
+  let d = Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").innerText = "🎲 " + d;
+
+  if(turn==="red"){
+    moveRed(d);
+  } else {
+    moveBlue(d);
+  }
+
+  draw();
+}
+
+function moveRed(d){
+  if(redPos === -1 && d === 6){
+    redPos = 0;
+  } else if(redPos >= 0){
+    redPos += d;
+    if(redPos >= path.length-1){
+      redPos = path.length-1;
+      setTimeout(()=>alert("🔴 Red Wins!"),200);
+    }
+  }
+
+  if(redPos === bluePos && redPos !== -1){
+    bluePos = -1;
+  }
+
+  if(d !== 6){
+    turn="blue";
+    document.getElementById("turn").innerText="🔵 Blue Turn";
+  }
+}
+
+function moveBlue(d){
+  if(bluePos === -1 && d === 6){
+    bluePos = 0;
+  } else if(bluePos >= 0){
+    bluePos += d;
+    if(bluePos >= path.length-1){
+      bluePos = path.length-1;
+      setTimeout(()=>alert("🔵 Blue Wins!"),200);
+    }
+  }
+
+  if(bluePos === redPos && bluePos !== -1){
+    redPos = -1;
+  }
+
+  if(d !== 6){
+    turn="red";
+    document.getElementById("turn").innerText="🔴 Red Turn";
+  }
 }
 
 draw();
 
-function rollDice(){
-  let d=Math.floor(Math.random()*6)+1;
-  document.getElementById("dice").innerText="Dice: "+d;
-
-  if(turn==="red"){
-    redPos+=d;
-    if(redPos>224) redPos=224;
-    turn="blue";
-    document.getElementById("turn").innerText="Blue Turn";
-  } else {
-    bluePos+=d;
-    if(bluePos>224) bluePos=224;
-    turn="red";
-    document.getElementById("turn").innerText="Red Turn";
-  }
-
-  draw();
-
-  if(redPos===224) alert("Red Wins!");
-  if(bluePos===224) alert("Blue Wins!");
-}
 </script>
 
 </body>
