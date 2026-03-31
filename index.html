@@ -1,43 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ludo King Lite</title>
+<title>Ultra Ludo King</title>
 
 <style>
-body { text-align:center; font-family:Arial; background:#f0f0f0; }
+body { text-align:center; font-family:Arial; background:#eee; }
 
 .board {
-  width:360px;
+  width:450px;
   display:grid;
-  grid-template-columns:repeat(6,60px);
+  grid-template-columns:repeat(15,30px);
   margin:20px auto;
 }
 
 .cell {
-  width:60px;
-  height:60px;
+  width:30px;
+  height:30px;
   border:1px solid #999;
   display:flex;
   flex-wrap:wrap;
   align-items:center;
   justify-content:center;
-  background:white;
+  font-size:10px;
 }
 
 .redHome { background:#ffcccc; }
 .blueHome { background:#cce5ff; }
+.greenHome { background:#ccffcc; }
+.yellowHome { background:#fff3cc; }
+
 .path { background:#ddd; }
 
 .token {
-  width:18px;
-  height:18px;
+  width:10px;
+  height:10px;
   border-radius:50%;
-  margin:2px;
+  margin:1px;
   cursor:pointer;
 }
 
 .red { background:red; }
 .blue { background:blue; }
+.green { background:green; }
+.yellow { background:gold; }
 
 button {
   padding:10px 20px;
@@ -54,7 +59,7 @@ button {
 
 <body>
 
-<h1>👑 Ludo King Lite</h1>
+<h1>👑 Ultra Ludo King</h1>
 <h2 id="turn">🔴 Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
@@ -64,65 +69,61 @@ button {
 
 <script>
 
-// simple path
-let path = [
-8,9,10,11,
-17,23,29,
-28,27,26,
-20,14
-];
+// simple circular path (demo)
+let path = [];
+for(let i=0;i<60;i++) path.push(i);
 
-// create board
+// board
 let board = document.getElementById("board");
 
-for(let i=0;i<36;i++){
+for(let i=0;i<225;i++){
   let div=document.createElement("div");
   div.className="cell";
   div.id="c"+i;
 
   if(path.includes(i)) div.classList.add("path");
 
-  if(i<6) div.classList.add("redHome");
-  if(i>=30) div.classList.add("blueHome");
+  // homes
+  if(i<30) div.classList.add("redHome");
+  if(i>=195) div.classList.add("blueHome");
+  if(i%15<5 && i>150) div.classList.add("greenHome");
+  if(i%15>9 && i<75) div.classList.add("yellowHome");
 
   board.appendChild(div);
 }
 
 // players
-let red = [-1,-1,-1,-1];
-let blue = [-1,-1,-1,-1];
+let players = {
+  red: [-1,-1,-1,-1],
+  blue: [-1,-1,-1,-1],
+  green: [-1,-1,-1,-1],
+  yellow: [-1,-1,-1,-1]
+};
 
-let turn="red";
-let diceValue=0;
+let turnList = ["red","blue","green","yellow"];
+let turnIndex = 0;
+let diceValue = 0;
+
+function currentPlayer(){
+  return turnList[turnIndex];
+}
 
 function draw(){
   document.querySelectorAll(".cell").forEach(c=>c.innerHTML="");
 
-  // RED
-  red.forEach((p,i)=>{
-    let t=document.createElement("div");
-    t.className="token red";
-    t.onclick=()=>moveToken("red",i);
+  for(let p in players){
+    players[p].forEach((pos,i)=>{
+      let t=document.createElement("div");
+      t.className="token "+p;
+      t.onclick=()=>moveToken(p,i);
 
-    if(p>=0){
-      document.getElementById("c"+path[p]).appendChild(t);
-    } else {
-      document.getElementById("c0").appendChild(t);
-    }
-  });
-
-  // BLUE
-  blue.forEach((p,i)=>{
-    let t=document.createElement("div");
-    t.className="token blue";
-    t.onclick=()=>moveToken("blue",i);
-
-    if(p>=0){
-      document.getElementById("c"+path[p]).appendChild(t);
-    } else {
-      document.getElementById("c35").appendChild(t);
-    }
-  });
+      if(pos>=0){
+        document.getElementById("c"+path[pos]).appendChild(t);
+      } else {
+        document.getElementById("c0").appendChild(t);
+      }
+    });
+  }
 }
 
 function rollDice(){
@@ -132,10 +133,9 @@ function rollDice(){
 
 function moveToken(player,index){
 
-  if(player!==turn || diceValue===0) return;
+  if(player!==currentPlayer() || diceValue===0) return;
 
-  let arr = player==="red"?red:blue;
-  let enemy = player==="red"?blue:red;
+  let arr = players[player];
 
   if(arr[index]===-1){
     if(diceValue===6){
@@ -149,26 +149,34 @@ function moveToken(player,index){
       setTimeout(()=>alert(player+" Wins!"),200);
     }
 
-    // kill
-    enemy.forEach((e,i)=>{
-      if(arr[index]===e){
-        enemy[i]=-1;
+    // kill others
+    for(let p in players){
+      if(p!==player){
+        players[p].forEach((e,i)=>{
+          if(arr[index]===e){
+            players[p][i]=-1;
+          }
+        });
       }
-    });
+    }
   }
 
-  if(diceValue !== 6){
-    turn = turn==="red"?"blue":"red";
-    updateTurn();
+  if(diceValue!==6){
+    turnIndex = (turnIndex+1)%4;
   }
 
   diceValue=0;
+  updateTurn();
   draw();
 }
 
 function updateTurn(){
+  let p=currentPlayer();
+  let emoji = {
+    red:"🔴", blue:"🔵", green:"🟢", yellow:"🟡"
+  };
   document.getElementById("turn").innerText =
-    turn==="red" ? "🔴 Red Turn" : "🔵 Blue Turn";
+    emoji[p]+" "+p.toUpperCase()+" Turn";
 }
 
 draw();
