@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ludo Level 3 Pro</title>
+<title>Ludo Level 2</title>
 
 <style>
 body { text-align:center; font-family:Arial; background:#f2f2f2; }
@@ -18,7 +18,6 @@ body { text-align:center; font-family:Arial; background:#f2f2f2; }
   height:40px;
   border:1px solid #aaa;
   display:flex;
-  flex-wrap:wrap;
   align-items:center;
   justify-content:center;
   background:white;
@@ -27,11 +26,10 @@ body { text-align:center; font-family:Arial; background:#f2f2f2; }
 .path { background:#ddd; }
 
 .token {
-  width:14px;
-  height:14px;
+  width:16px;
+  height:16px;
   border-radius:50%;
   margin:1px;
-  cursor:pointer;
 }
 
 .red { background:red; }
@@ -52,7 +50,7 @@ button {
 
 <body>
 
-<h1>🎲 Ludo Level 3 Pro</h1>
+<h1>🎲 Ludo Level 2</h1>
 <h2 id="turn">🔴 Red Turn</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
@@ -62,6 +60,7 @@ button {
 
 <script>
 
+// path
 let path = [
 0,1,2,3,4,5,6,7,
 15,23,31,39,47,55,63,
@@ -69,8 +68,8 @@ let path = [
 48,40,32,24,16,8
 ];
 
+// create board
 let board = document.getElementById("board");
-
 for(let i=0;i<64;i++){
   let div=document.createElement("div");
   div.className="cell";
@@ -79,75 +78,68 @@ for(let i=0;i<64;i++){
   board.appendChild(div);
 }
 
-// players
-let red = [-1,-1,-1,-1];
-let blue = [-1,-1,-1,-1];
-
-let turn="red";
-let diceValue=0;
+// players tokens
+let red = [-1,-1];
+let blue = [-1,-1];
+let turn = "red";
 
 function draw(){
   document.querySelectorAll(".cell").forEach(c=>c.innerHTML="");
 
-  red.forEach((p,i)=>{
+  red.forEach(p=>{
     if(p>=0){
       let t=document.createElement("div");
       t.className="token red";
-      t.onclick=()=>moveToken("red",i);
       document.getElementById("c"+path[p]).appendChild(t);
     }
   });
 
-  blue.forEach((p,i)=>{
+  blue.forEach(p=>{
     if(p>=0){
       let t=document.createElement("div");
       t.className="token blue";
-      t.onclick=()=>moveToken("blue",i);
       document.getElementById("c"+path[p]).appendChild(t);
     }
   });
 }
 
 function rollDice(){
-  diceValue=Math.floor(Math.random()*6)+1;
-  document.getElementById("dice").innerText="🎲 "+diceValue;
-}
+  let d=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").innerText="🎲 "+d;
 
-function moveToken(player,index){
-
-  if(player!==turn || diceValue===0) return;
-
-  let arr = player==="red"?red:blue;
-  let enemy = player==="red"?blue:red;
-
-  if(arr[index]===-1 && diceValue===6){
-    arr[index]=0;
-  } else if(arr[index]>=0){
-    arr[index]+=diceValue;
-
-    if(arr[index]>=path.length-1){
-      arr[index]=path.length-1;
-      setTimeout(()=>alert(player+" Wins!"),200);
-    }
-
-    // kill
-    enemy.forEach((e,i)=>{
-      if(arr[index]===e){
-        enemy[i]=-1;
-      }
-    });
+  if(turn==="red"){
+    move(red, blue, d);
+    if(d!==6){ turn="blue"; updateTurn(); }
   } else {
-    return;
-  }
-
-  diceValue=0;
-
-  if(diceValue!==6){
-    turn = turn==="red"?"blue":"red";
-    updateTurn();
+    move(blue, red, d);
+    if(d!==6){ turn="red"; updateTurn(); }
   }
 
   draw();
+}
+
+function move(player, enemy, d){
+  for(let i=0;i<player.length;i++){
+    if(player[i]===-1 && d===6){
+      player[i]=0;
+      return;
+    }
+    if(player[i]>=0){
+      player[i]+=d;
+      if(player[i]>=path.length-1){
+        player[i]=path.length-1;
+        setTimeout(()=>alert(turn+" wins!"),200);
+      }
+
+      // kill
+      for(let j=0;j<enemy.length;j++){
+        if(player[i]===enemy[j]){
+          enemy[j]=-1;
+        }
+      }
+      return;
+    }
+  }
 }
 
 function updateTurn(){
