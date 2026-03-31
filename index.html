@@ -1,20 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ludo Game</title>
-</head>
-<body style="text-align:center; font-family:sans-serif; background:white;">
+<title>Full Ludo Game</title>
 
-<h1>🎲 Ludo Game</h1>
-<p>Game chal raha hai!</p>
+<style>
+body {
+    text-align: center;
+    font-family: Arial;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    grid-template-rows: repeat(10, 40px);
+    gap: 2px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.cell {
+    width: 40px;
+    height: 40px;
+    background: #eee;
+    border: 1px solid #999;
+}
+
+.player1 { background: red; }
+.player2 { background: blue; }
+
+.token {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: auto;
+}
+
+.red { background: red; }
+.blue { background: blue; }
+
+button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin-top: 20px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🎲 Full Ludo Game</h1>
+
+<h2 id="turn">Player 1 Turn (Red)</h2>
 
 <button onclick="rollDice()">Roll Dice</button>
-<h2 id="dice">🎲</h2>
+<h3 id="dice"></h3>
+
+<div class="board" id="board"></div>
 
 <script>
-function rollDice() {
-  var num = Math.floor(Math.random() * 6) + 1;
-  document.getElementById("dice").innerHTML = "🎲 " + num;
+let board = document.getElementById("board");
+
+// create board
+for(let i=0;i<100;i++){
+    let div = document.createElement("div");
+    div.className = "cell";
+    div.id = "cell"+i;
+    board.appendChild(div);
+}
+
+// players
+let p1 = 0;
+let p2 = 0;
+let turn = 1;
+
+function drawTokens(){
+    document.querySelectorAll(".cell").forEach(c => c.innerHTML = "");
+
+    let t1 = document.createElement("div");
+    t1.className = "token red";
+    document.getElementById("cell"+p1).appendChild(t1);
+
+    let t2 = document.createElement("div");
+    t2.className = "token blue";
+    document.getElementById("cell"+p2).appendChild(t2);
+}
+
+drawTokens();
+
+function rollDice(){
+    let num = Math.floor(Math.random()*6)+1;
+    document.getElementById("dice").innerText = "Dice: "+num;
+
+    if(turn === 1){
+        p1 += num;
+        if(p1 > 99) p1 = 99;
+        turn = 2;
+        document.getElementById("turn").innerText = "Player 2 Turn (Blue)";
+    } else {
+        p2 += num;
+        if(p2 > 99) p2 = 99;
+        turn = 1;
+        document.getElementById("turn").innerText = "Player 1 Turn (Red)";
+    }
+
+    drawTokens();
+
+    if(p1 === 99){
+        alert("Player 1 Wins!");
+    }
+    if(p2 === 99){
+        alert("Player 2 Wins!");
+    }
 }
 </script>
 
